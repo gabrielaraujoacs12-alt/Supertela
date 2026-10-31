@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Tela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        netflix: '#E50914',
+                        darkBg: '#141414',
+                        cardBg: '#1f1f1f'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+        /* Scrollbar customizada sem margens laterais desnecessárias */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-white font-sans antialiased min-h-screen flex">
+
+    <!-- OVERLAY ESCURO PARA DISPOSITIVOS MÓVEIS OU QUANDO EXPANDIDO -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/70 z-40 hidden transition-opacity"></div>
+
+    <!-- OVERLAY PARA DROPDOWN DO PERFIL -->
+    <div id="profile-overlay" onclick="toggleProfileMenu(false)" class="fixed inset-0 z-40 hidden"></div>
+
+    <!-- MENU LATERAL RECOLHÍVEL (OCULTO POR PADRÃO) -->
+    <aside id="sidebar" class="sidebar-transition w-64 bg-black/95 border-r border-zinc-800 flex flex-col fixed inset-y-0 left-0 z-50 overflow-hidden shadow-2xl -translate-x-full">
+        <!-- Cabeçalho da Sidebar -->
+        <div class="h-16 flex items-center justify-between px-4 border-b border-zinc-800/60 shrink-0">
+            <h1 id="sidebar-logo" class="text-xl font-black text-netflix tracking-wider cursor-pointer truncate" onclick="showSection('home')">SUPER TELA</h1>
+            <button onclick="toggleSidebar()" class="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800/60 transition focus:outline-none" title="Fechar Menu">
+                <i id="toggle-icon" class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Links de Navegação -->
+        <nav class="flex-grow py-6 px-3 space-y-2 overflow-y-auto">
+            <button onclick="showSection('home')" id="nav-home" class="w-full flex items-center space-x-4 px-3 py-3 rounded-lg text-white bg-netflix/20 font-semibold transition hover:bg-netflix/30 group">
+                <i class="fa-solid fa-house text-lg w-6 text-center text-netflix group-hover:scale-110 transition"></i>
+                <span class="sidebar-text truncate">Início</span>
+            </button>
+
+            <button onclick="showSection('movies')" id="nav-movies" class="w-full flex items-center space-x-4 px-3 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium transition group">
+                <i class="fa-solid fa-film text-lg w-6 text-center text-zinc-400 group-hover:text-white group-hover:scale-110 transition"></i>
+                <span class="sidebar-text truncate">Filmes</span>
+            </button>
+
+            <button onclick="showSection('series')" id="nav-series" class="w-full flex items-center space-x-4 px-3 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium transition group">
+                <i class="fa-solid fa-tv text-lg w-6 text-center text-zinc-400 group-hover:text-white group-hover:scale-110 transition"></i>
+                <span class="sidebar-text truncate">Séries</span>
+            </button>
+
+            <button onclick="showSection('favorites')" id="nav-favorites" class="w-full flex items-center space-x-4 px-3 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium transition group">
+                <i class="fa-solid fa-bookmark text-lg w-6 text-center text-zinc-400 group-hover:text-white group-hover:scale-110 transition"></i>
+                <span class="sidebar-text truncate">Minha Lista</span>
+            </button>
+
+            <button onclick="showSection('request')" id="nav-request" class="w-full flex items-center space-x-4 px-3 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium transition group">
+                <i class="fa-solid fa-paper-plane text-lg w-6 text-center text-zinc-400 group-hover:text-white group-hover:scale-110 transition"></i>
+                <span class="sidebar-text truncate">Pedir Título</span>
+            </button>
+        </nav>
+
+        <!-- Rodapé da Sidebar -->
+        <div class="p-4 border-t border-zinc-800/60 shrink-0">
+            <div class="flex items-center space-x-3 text-zinc-500 text-xs">
+                <i class="fa-solid fa-clapperboard text-sm text-netflix"></i>
+                <span class="sidebar-text truncate">v2.1 • Super Tela</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="main-content" class="w-full transition-all duration-300 ml-0 min-h-screen flex flex-col">
+
+        <!-- BARRA SUPERIOR / TOPO FIXO (LARGURA TOTAL 100%) -->
+        <header class="fixed top-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3 flex items-center justify-between w-full">
+            <!-- BOTÃO FLUTUANTE DE MENU (ESQUERDA) -->
+            <div class="flex items-center w-12">
+                <button onclick="toggleSidebar()" class="bg-zinc-800/90 hover:bg-netflix text-white p-2.5 rounded-xl border border-zinc-700/60 transition duration-200 hover:scale-105 active:scale-95 flex items-center justify-center focus:outline-none shadow-lg" title="Abrir Menu">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- NOME DO APLICATIVO NO TOPO (CENTRALIZADO) -->
+            <div onclick="showSection('home')" class="cursor-pointer select-none group text-center">
+                <span class="text-2xl md:text-3xl font-black italic tracking-wider bg-gradient-to-r from-red-500 via-red-600 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(229,9,20,0.8)] group-hover:brightness-125 transition-all duration-300">
+                    SUPER<span class="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">TELA</span>
+                </span>
+            </div>
+
+            <!-- ÍCONE DE PERFIL COM MENU DROPDOWN (DIREITA) -->
+            <div class="relative flex items-center justify-end w-12 z-50">
+                <button onclick="toggleProfileMenu()" id="profile-btn" class="bg-zinc-800/90 hover:border-netflix text-white w-10 h-10 rounded-full border border-zinc-700/60 transition duration-200 hover:scale-105 flex items-center justify-center focus:outline-none shadow-lg relative" title="Perfil">
+                    <i class="fa-solid fa-user text-base text-zinc-300"></i>
+                    <span id="user-status-dot" class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-zinc-500 border-2 border-black"></span>
+                </button>
+
+                <!-- MENU DROPDOWN DE PERFIL -->
+                <div id="profile-dropdown" class="absolute right-0 top-12 w-64 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl p-2 hidden flex-col space-y-1">
+                    
+                    <!-- ESTADO: DESLOGADO -->
+                    <div id="dropdown-logged-out" class="space-y-1">
+                        <div class="px-3 py-2 border-b border-zinc-800/80 mb-1">
+                            <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Bem-vindo(a)</p>
+                            <p class="text-sm text-zinc-200">Acesse sua conta para sincronizar preferências</p>
+                        </div>
+                        <button onclick="openAuthModal('login')" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-white hover:bg-zinc-800 flex items-center space-x-3 transition">
+                            <i class="fa-solid fa-right-to-bracket text-netflix w-5 text-center"></i>
+                            <span class="font-medium">Entrar com E-mail</span>
+                        </button>
+                        <button onclick="openAuthModal('register')" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-white hover:bg-netflix/20 bg-netflix/10 border border-netflix/30 flex items-center space-x-3 transition">
+                            <i class="fa-solid fa-user-plus text-netflix w-5 text-center"></i>
+                            <span class="font-medium">Criar Conta Gratuita</span>
+                        </button>
+                    </div>
+
+                    <!-- ESTADO: LOGADO -->
+                    <div id="dropdown-logged-in" class="space-y-1 hidden">
+                        <div class="px-3 py-2.5 border-b border-zinc-800/80 mb-1 flex items-center space-x-3 bg-zinc-800/40 rounded-lg">
+                            <div class="w-9 h-9 rounded-full bg-netflix flex items-center justify-center font-bold text-white text-sm shrink-0" id="user-avatar-initial">
+                                U
+                            </div>
+                            <div class="overflow-hidden">
+                                <p id="user-display-name" class="text-sm font-bold truncate text-white">Usuário</p>
+                                <p id="user-display-email" class="text-xs text-zinc-400 truncate">usuario@email.com</p>
+                            </div>
+                        </div>
+                        <div class="px-3 py-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full inline-block">Plano Gratuito Ativo</span>
+                        </div>
+                        <button onclick="showSection('favorites')" class="w-full text-left px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 flex items-center space-x-3 transition">
+                            <i class="fa-solid fa-bookmark w-5 text-center text-zinc-400"></i>
+                            <span>Minha Lista</span>
+                        </button>
+                        <button onclick="logoutUser()" class="w-full text-left px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 flex items-center space-x-3 transition">
+                            <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
+                            <span>Sair da Conta</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <!-- ÁREA PRINCIPAL SEM MARGENS LATERAIS (FULL WIDTH) -->
+        <main class="w-full flex-grow pb-12 pt-16">
+            <!-- SEÇÃO: INÍCIO / HOME -->
+            <section id="sec-home" class="w-full space-y-8">
+                <!-- Destaque / Banner sem margens -->
+                <div id="hero-banner" class="relative h-[65vh] w-full bg-cover bg-center flex items-end p-6 md:p-10" style="background-image: linear-gradient(to top, #141414, transparent), url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=1600&auto=format&fit=crop');">
+                    <div class="w-full max-w-2xl space-y-4">
+                        <span id="hero-badge" class="bg-netflix text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider">Destaque</span>
+                        <h2 id="hero-title" class="text-4xl md:text-5xl font-extrabold drop-shadow-md">Carregando Destaque...</h2>
+                        <p id="hero-desc" class="text-sm md:text-base text-zinc-300 line-clamp-3">Selecione títulos incríveis para assistir agora mesmo no Super Tela.</p>
+                        <div class="flex space-x-4 pt-2">
+                            <button id="hero-play-btn" class="bg-white text-black hover:bg-zinc-200 px-6 py-3 rounded-lg font-bold flex items-center space-x-2 transition">
+                                <i class="fa-solid fa-play"></i> <span>Assistir</span>
+                            </button>
+                            <button id="hero-fav-btn" class="bg-zinc-800/80 hover:bg-zinc-700 px-6 py-3 rounded-lg font-bold flex items-center space-x-2 backdrop-blur transition">
+                                <i class="fa-solid fa-plus"></i> <span>Minha Lista</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Continuar Assistindo -->
+                <div id="continue-watching-wrapper" class="w-full px-2 md:px-4 hidden">
+                    <h3 class="text-xl font-bold mb-4 px-2">Continuar Assistindo</h3>
+                    <div id="continue-list" class="flex space-x-3 overflow-x-auto pb-4 scrollbar-hide px-2"></div>
+                </div>
+
+                <!-- Lançamentos sem margens grandes -->
+                <div class="w-full px-2 md:px-4">
+                    <h3 class="text-xl font-bold mb-4 px-2">Lançamentos</h3>
+                    <div id="releases-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3"></div>
+                </div>
+
+                <!-- Gêneros Dinâmicos em largura total -->
+                <div id="genres-container" class="w-full space-y-8 px-2 md:px-4"></div>
+            </section>
+
+            <!-- SEÇÃO: FILMES -->
+            <section id="sec-movies" class="w-full px-2 md:px-4 pt-6 space-y-6 hidden">
+                <h2 class="text-3xl font-bold px-2">Filmes</h2>
+                <div id="movies-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3"></div>
+            </section>
+
+            <!-- SEÇÃO: SÉRIES -->
+            <section id="sec-series" class="w-full px-2 md:px-4 pt-6 space-y-6 hidden">
+                <h2 class="text-3xl font-bold px-2">Séries</h2>
+                <div id="series-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3"></div>
+            </section>
+
+            <!-- SEÇÃO: FAVORITOS -->
+            <section id="sec-favorites" class="w-full px-2 md:px-4 pt-6 space-y-6 hidden">
+                <h2 class="text-3xl font-bold px-2">Minha Lista de Favoritos</h2>
+                <div id="favorites-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3"></div>
+            </section>
+
+            <!-- SEÇÃO: PEDIR TÍTULO -->
+            <section id="sec-request" class="w-full px-2 md:px-4 pt-6 space-y-6 hidden">
+                <div class="w-full bg-cardBg p-6 md:p-8 rounded-xl border border-zinc-800 shadow-xl">
+                    <h2 class="text-2xl font-bold mb-2">Pedir Filme ou Série</h2>
+                    <p class="text-sm text-zinc-400 mb-6">Não encontrou o que procurava? Envie seu pedido diretamente para a nossa administração!</p>
+                    <form onsubmit="handleRequestSubmit(event)" class="space-y-4 w-full">
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-1">Seu Nome / Apelido (Opcional)</label>
+                            <input type="text" id="req-user" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-netflix" placeholder="Ex: Usuário Anônimo">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-1">Nome do Filme ou Série</label>
+                            <input type="text" id="req-title" required class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-netflix" placeholder="Ex: Interestelar, Breaking Bad...">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-1">Tipo</label>
+                            <select id="req-type" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-netflix">
+                                <option value="Filme">Filme</option>
+                                <option value="Série">Série</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-1">Observações (Opcional)</label>
+                            <textarea id="req-obs" rows="3" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-netflix" placeholder="Ano, ator principal ou detalhes..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-netflix hover:bg-red-700 transition font-semibold p-3 rounded-lg">Enviar Pedido</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: PLAYER / DETALHES -->
+            <section id="sec-player" class="w-full px-2 md:px-4 pt-6 space-y-6 hidden">
+                <button onclick="goBack()" class="text-zinc-400 hover:text-white flex items-center space-x-2 mb-2 px-2">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Voltar</span>
+                </button>
+                
+                <div id="player-container" class="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-2xl relative flex items-center justify-center">
+                    <!-- Player dinâmico injetado via JS -->
+                </div>
+
+                <div class="space-y-4 px-2">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 id="player-title" class="text-3xl font-bold">Título do Vídeo</h2>
+                            <div class="flex items-center space-x-4 text-sm text-zinc-400 mt-2">
+                                <span id="player-year">2026</span>
+                                <span id="player-genre" class="bg-zinc-800 px-2.5 py-0.5 rounded">Gênero</span>
+                            </div>
+                        </div>
+                        <button id="player-fav-btn" onclick="toggleCurrentFavorite()" class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg flex items-center space-x-2 transition self-start md:self-auto">
+                            <i class="fa-solid fa-plus"></i> <span>Favorito</span>
+                        </button>
+                    </div>
+                    <p id="player-desc" class="text-zinc-300 text-sm leading-relaxed">Descrição detalhada do conteúdo...</p>
+
+                    <!-- Seletor de Temporadas e Episódios (Para Séries) -->
+                    <div id="seasons-wrapper" class="hidden space-y-4 pt-4 border-t border-zinc-800">
+                        <div class="flex space-x-2 overflow-x-auto pb-2" id="seasons-tabs"></div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="episodes-list"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL DE AUTENTICAÇÃO (ENTRAR / CRIAR CONTA) -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-cardBg border border-zinc-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative space-y-5">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- TÍTULOS DO MODAL -->
+            <div class="text-center">
+                <h3 id="auth-modal-title" class="text-2xl font-bold text-white">Entrar no Super Tela</h3>
+                <p id="auth-modal-subtitle" class="text-sm text-zinc-400 mt-1">Insira seus dados para continuar</p>
+            </div>
+
+            <!-- FORMULÁRIO -->
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="field-name-container" class="hidden">
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Nome Completo</label>
+                    <input type="text" id="auth-name" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-netflix" placeholder="Seu nome">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Endereço de E-mail</label>
+                    <input type="email" id="auth-email" required class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-netflix" placeholder="seuemail@exemplo.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Senha</label>
+                    <input type="password" id="auth-password" required class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-netflix" placeholder="••••••••">
+                </div>
+
+                <div id="auth-error-msg" class="text-xs text-red-500 hidden font-semibold text-center"></div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-netflix hover:bg-red-700 font-bold py-3 rounded-lg text-white transition">
+                    Entrar
+                </button>
+            </form>
+
+            <!-- ALTERNADOR LOGIN / REGISTER -->
+            <div class="text-center pt-2 border-t border-zinc-800 text-sm text-zinc-400">
+                <span id="auth-toggle-text">Ainda não possui uma conta?</span>
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-netflix hover:underline font-bold ml-1">Criar conta gratuita</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DO APLICATIVO -->
+    <script>
+        let isSidebarOpen = false;
+        let isProfileMenuOpen = false;
+        let authMode = 'login';
+        let currentUser = null;
+
+        let currentItem = null;
+        let currentEpIndex = 0;
+        let currentSeasonIndex = 0;
+
+        const defaultContent = [
+            {
+                id: "1",
+                title: "Exemplo Filme Ação",
+                type: "Filme",
+                genre: "Ação",
+                year: "2026",
+                synopsis: "Um filme repleto de adrenalina e efeitos visuais impressionantes mapeado diretamente da web.",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop",
+                link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            },
+            {
+                id: "2",
+                title: "Exemplo Série Drama",
+                type: "Série",
+                genre: "Drama",
+                year: "2025",
+                synopsis: "Uma série dramática envolvente com várias temporadas e episódios automáticos.",
+                poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop",
+                seasons: [
+                    {
+                        name: "Temporada 1",
+                        episodes: [
+                            { title: "Episódio 1: O Início", link: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                            { title: "Episódio 2: Consequências", link: "https://www.w3schools.com/html/mov_bbb.mp4" }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // --- SISTEMA DE AUTENTICAÇÃO E PERFIL ---
+        function loadUserSession() {
+            const savedUser = localStorage.getItem('st_logged_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+            updateProfileUI();
+        }
+
+        function toggleProfileMenu(forceState) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const overlay = document.getElementById('profile-overlay');
+
+            if (forceState !== undefined) {
+                isProfileMenuOpen = forceState;
+            } else {
+                isProfileMenuOpen = !isProfileMenuOpen;
+            }
+
+            if (isProfileMenuOpen) {
+                dropdown.classList.remove('hidden');
+                dropdown.classList.add('flex');
+                overlay.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('flex');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function updateProfileUI() {
+            const loggedOutView = document.getElementById('dropdown-logged-out');
+            const loggedInView = document.getElementById('dropdown-logged-in');
+            const statusDot = document.getElementById('user-status-dot');
+            const profileBtn = document.getElementById('profile-btn');
+
+            if (currentUser) {
+                loggedOutView.classList.add('hidden');
+                loggedInView.classList.remove('hidden');
+                statusDot.classList.remove('bg-zinc-500');
+                statusDot.classList.add('bg-emerald-500');
+
+                document.getElementById('user-display-name').innerText = currentUser.name || 'Usuário';
+                document.getElementById('user-display-email').innerText = currentUser.email;
+                document.getElementById('user-avatar-initial').innerText = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+
+                profileBtn.classList.add('border-netflix');
+            } else {
+                loggedOutView.classList.remove('hidden');
+                loggedInView.classList.add('hidden');
+                statusDot.classList.remove('bg-emerald-500');
+                statusDot.classList.add('bg-zinc-500');
+
+                profileBtn.classList.remove('border-netflix');
+            }
+        }
+
+        function openAuthModal(mode) {
+            authMode = mode;
+            toggleProfileMenu(false);
+            const modal = document.getElementById('auth-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            updateAuthModalFields();
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('auth-error-msg').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            authMode = authMode === 'login' ? 'register' : 'login';
+            updateAuthModalFields();
+        }
+
+        function updateAuthModalFields() {
+            const title = document.getElementById('auth-modal-title');
+            const subtitle = document.getElementById('auth-modal-subtitle');
+            const nameContainer = document.getElementById('field-name-container');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+
+            if (authMode === 'register') {
+                title.innerText = 'Criar Conta Gratuita';
+                subtitle.innerText = 'Crie sua conta para acessar em qualquer dispositivo';
+                nameContainer.classList.remove('hidden');
+                submitBtn.innerText = 'Cadastrar Conta';
+                toggleText.innerText = 'Já possui uma conta?';
+                toggleBtn.innerText = 'Entrar agora';
+            } else {
+                title.innerText = 'Entrar no Super Tela';
+                subtitle.innerText = 'Insira seus dados de acesso';
+                nameContainer.classList.add('hidden');
+                submitBtn.innerText = 'Entrar';
+                toggleText.innerText = 'Ainda não possui uma conta?';
+                toggleBtn.innerText = 'Criar conta gratuita';
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value.trim();
+            const errorMsg = document.getElementById('auth-error-msg');
+
+            errorMsg.classList.add('hidden');
+
+            if (authMode === 'register') {
+                let users = JSON.parse(localStorage.getItem('st_registered_users')) || [];
+                if (users.some(u => u.email === email)) {
+                    errorMsg.innerText = 'Este e-mail já está cadastrado!';
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+
+                const newUser = { id: Date.now().toString(), name: name || 'Usuário', email, password };
+                users.push(newUser);
+                localStorage.setItem('st_registered_users', JSON.stringify(users));
+
+                currentUser = newUser;
+                localStorage.setItem('st_logged_user', JSON.stringify(currentUser));
+            } else {
+                let users = JSON.parse(localStorage.getItem('st_registered_users')) || [];
+                const userFound = users.find(u => u.email === email && u.password === password);
+
+                if (!userFound) {
+                    if (users.length === 0) {
+                        currentUser = { id: '1', name: email.split('@')[0], email, password };
+                        localStorage.setItem('st_logged_user', JSON.stringify(currentUser));
+                    } else {
+                        errorMsg.innerText = 'E-mail ou senha incorretos!';
+                        errorMsg.classList.remove('hidden');
+                        return;
+                    }
+                } else {
+                    currentUser = userFound;
+                    localStorage.setItem('st_logged_user', JSON.stringify(currentUser));
+                }
+            }
+
+            updateProfileUI();
+            closeAuthModal();
+            
+            const reqUser = document.getElementById('req-user');
+            if (reqUser && currentUser) reqUser.value = currentUser.name;
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem('st_logged_user');
+            updateProfileUI();
+            toggleProfileMenu(false);
+        }
+
+        // --- SISTEMA NAVEGAÇÃO E SIDEBAR ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            isSidebarOpen = !isSidebarOpen;
+
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function getContent() {
+            return JSON.parse(localStorage.getItem('st_content')) || defaultContent;
+        }
+
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('st_favorites_guest')) || [];
+        }
+
+        function saveFavorites(favs) {
+            localStorage.setItem('st_favorites_guest', JSON.stringify(favs));
+        }
+
+        function initApp() {
+            loadUserSession();
+            renderHome();
+            renderCatalog();
+        }
+
+        function showSection(secName) {
+            ['home', 'movies', 'series', 'favorites', 'request', 'player'].forEach(s => {
+                document.getElementById(`sec-${s}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${s}`);
+                if (navBtn) {
+                    navBtn.classList.remove('bg-netflix/20', 'text-white');
+                    navBtn.classList.add('text-zinc-400');
+                    const icon = navBtn.querySelector('i');
+                    if (icon) icon.classList.remove('text-netflix');
+                }
+            });
+
+            document.getElementById(`sec-${secName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${secName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-netflix/20', 'text-white');
+                activeBtn.classList.remove('text-zinc-400');
+                const icon = activeBtn.querySelector('i');
+                if (icon) icon.classList.add('text-netflix');
+            }
+
+            if (isSidebarOpen) toggleSidebar();
+            if (isProfileMenuOpen) toggleProfileMenu(false);
+
+            window.scrollTo(0, 0);
+            if (secName === 'favorites') renderFavorites();
+            if (secName === 'request' && currentUser) {
+                document.getElementById('req-user').value = currentUser.name || '';
+            }
+        }
+
+        function renderHome() {
+            const content = getContent();
+            if (content.length === 0) return;
+
+            const hero = content[0];
+            document.getElementById('hero-title').innerText = hero.title;
+            document.getElementById('hero-desc').innerText = hero.synopsis;
+            document.getElementById('hero-banner').style.backgroundImage = `linear-gradient(to top, #141414, transparent), url('${hero.poster}')`;
+            document.getElementById('hero-play-btn').onclick = () => openPlayer(hero);
+            document.getElementById('hero-fav-btn').onclick = () => {
+                currentItem = hero;
+                toggleCurrentFavorite();
+            };
+
+            const releasesEl = document.getElementById('releases-list');
+            releasesEl.innerHTML = content.slice(0, 6).map(item => cardTemplate(item)).join('');
+
+            const genresMap = {};
+            content.forEach(item => {
+                if (!genresMap[item.genre]) genresMap[item.genre] = [];
+                genresMap[item.genre].push(item);
+            });
+
+            const genresContainer = document.getElementById('genres-container');
+            genresContainer.innerHTML = Object.keys(genresMap).map(genre => `
+                <div class="w-full">
+                    <h3 class="text-xl font-bold mb-4 px-2">${genre}</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
+                        ${genresMap[genre].map(item => cardTemplate(item)).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            renderContinueWatching();
+        }
+
+        function renderCatalog() {
+            const content = getContent();
+            document.getElementById('movies-grid').innerHTML = content.filter(i => i.type === 'Filme').map(i => cardTemplate(i)).join('');
+            document.getElementById('series-grid').innerHTML = content.filter(i => i.type === 'Série').map(i => cardTemplate(i)).join('');
+        }
+
+        function renderFavorites() {
+            const favs = getFavorites();
+            const content = getContent();
+            const favItems = content.filter(i => favs.includes(i.id));
+            const grid = document.getElementById('favorites-grid');
+            if (favItems.length === 0) {
+                grid.innerHTML = `<p class="text-zinc-400 col-span-full px-2">Sua lista de favoritos está vazia.</p>`;
+            } else {
+                grid.innerHTML = favItems.map(i => cardTemplate(i)).join('');
+            }
+        }
+
+        function cardTemplate(item) {
+            return `
+                <div onclick='openPlayerById("${item.id}")' class="bg-cardBg rounded-lg overflow-hidden cursor-pointer group transition transform hover:scale-105 border border-zinc-800">
+                    <div class="aspect-[2/3] w-full bg-zinc-800 relative">
+                        <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <i class="fa-solid fa-play text-3xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="p-2 md:p-3">
+                        <h4 class="font-bold text-sm truncate">${item.title}</h4>
+                        <span class="text-xs text-zinc-400">${item.genre} • ${item.year}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openPlayerById(id) {
+            const content = getContent();
+            const item = content.find(i => i.id === id);
+            if (item) openPlayer(item);
+        }
+
+        function openPlayer(item, sIndex = 0, eIndex = 0) {
+            currentItem = item;
+            currentSeasonIndex = sIndex;
+            currentEpIndex = eIndex;
+
+            document.getElementById('player-title').innerText = item.title;
+            document.getElementById('player-year').innerText = item.year;
+            document.getElementById('player-genre').innerText = item.genre;
+            document.getElementById('player-desc').innerText = item.synopsis;
+
+            updateFavoriteButtonState();
+            setupVideoSource();
+
+            if (item.type === 'Série' && item.seasons) {
+                document.getElementById('seasons-wrapper').classList.remove('hidden');
+                renderSeasons(item);
+            } else {
+                document.getElementById('seasons-wrapper').classList.add('hidden');
+            }
+
+            showSection('player');
+            saveContinueWatching(item);
+        }
+
+        function setupVideoSource() {
+            let link = "";
+            if (currentItem.type === 'Série' && currentItem.seasons) {
+                link = currentItem.seasons[currentSeasonIndex].episodes[currentEpIndex].link;
+            } else {
+                link = currentItem.link;
+            }
+
+            const container = document.getElementById('player-container');
+            container.innerHTML = parseVideoLink(link);
+        }
+
+        function parseVideoLink(url) {
+            if (!url) return `<div class="text-zinc-500">Nenhum link configurado para este item.</div>`;
+
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                let videoId = '';
+                if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
+                else if (url.includes('watch?v=')) videoId = url.split('watch?v=')[1].split('&')[0];
+                return `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" class="w-full h-full" frameborder="0" allowfullscreen></iframe>`;
+            }
+
+            if (url.includes('drive.google.com') || url.includes('mega.nz') || url.includes('terabox.com') || url.includes('<iframe')) {
+                if (url.startsWith('<iframe')) return url;
+                return `<iframe src="${url}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>`;
+            }
+
+            return `<video id="main-video" src="${url}" controls autoplay class="w-full h-full" onended="handleVideoEnded()"></video>`;
+        }
+
+        function handleVideoEnded() {
+            if (currentItem.type === 'Série' && currentItem.seasons) {
+                const season = currentItem.seasons[currentSeasonIndex];
+                if (currentEpIndex + 1 < season.episodes.length) {
+                    currentEpIndex++;
+                    setupVideoSource();
+                } else if (currentSeasonIndex + 1 < currentItem.seasons.length) {
+                    currentSeasonIndex++;
+                    currentEpIndex = 0;
+                    setupVideoSource();
+                }
+            }
+        }
+
+        function renderSeasons(item) {
+            const tabsEl = document.getElementById('seasons-tabs');
+            tabsEl.innerHTML = item.seasons.map((season, sIdx) => `
+                <button onclick="changeSeason(${sIdx})" class="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition ${sIdx === currentSeasonIndex ? 'bg-netflix text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}">
+                    ${season.name}
+                </button>
+            `).join('');
+
+            const epsEl = document.getElementById('episodes-list');
+            const currentSeason = item.seasons[currentSeasonIndex];
+            epsEl.innerHTML = currentSeason.episodes.map((ep, eIdx) => `
+                <div onclick="changeEpisode(${currentSeasonIndex}, ${eIdx})" class="flex items-center space-x-3 p-3 rounded-lg bg-zinc-900 border ${eIdx === currentEpIndex ? 'border-netflix' : 'border-zinc-800'} cursor-pointer hover:bg-zinc-800 transition">
+                    <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-sm">${eIdx + 1}</div>
+                    <div class="flex-grow">
+                        <h5 class="text-sm font-semibold">${ep.title}</h5>
+                    </div>
+                    <i class="fa-solid fa-play text-zinc-400"></i>
+                </div>
+            `).join('');
+        }
+
+        function changeSeason(sIdx) {
+            currentSeasonIndex = sIdx;
+            currentEpIndex = 0;
+            setupVideoSource();
+            renderSeasons(currentItem);
+        }
+
+        function changeEpisode(sIdx, eIdx) {
+            currentSeasonIndex = sIdx;
+            currentEpIndex = eIdx;
+            setupVideoSource();
+            renderSeasons(currentItem);
+        }
+
+        function toggleCurrentFavorite() {
+            if (!currentItem) return;
+            let favs = getFavorites();
+            if (favs.includes(currentItem.id)) {
+                favs = favs.filter(id => id !== currentItem.id);
+            } else {
+                favs.push(currentItem.id);
+            }
+            saveFavorites(favs);
+            updateFavoriteButtonState();
+        }
+
+        function updateFavoriteButtonState() {
+            if (!currentItem) return;
+            const favs = getFavorites();
+            const isFav = favs.includes(currentItem.id);
+            const btn = document.getElementById('player-fav-btn');
+            btn.innerHTML = isFav ? `<i class="fa-solid fa-check text-netflix"></i> <span>Na Lista</span>` : `<i class="fa-solid fa-plus"></i> <span>Favorito</span>`;
+        }
+
+        function saveContinueWatching(item) {
+            let userHistory = JSON.parse(localStorage.getItem('st_history_guest')) || [];
+            userHistory = userHistory.filter(i => i.id !== item.id);
+            userHistory.unshift(item);
+            localStorage.setItem('st_history_guest', JSON.stringify(userHistory));
+            renderContinueWatching();
+        }
+
+        function renderContinueWatching() {
+            let userHistory = JSON.parse(localStorage.getItem('st_history_guest')) || [];
+            const wrapper = document.getElementById('continue-watching-wrapper');
+            const list = document.getElementById('continue-list');
+
+            if (userHistory.length === 0) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+
+            wrapper.classList.remove('hidden');
+            list.innerHTML = userHistory.map(item => `
+                <div onclick='openPlayerById("${item.id}")' class="min-w-[200px] w-[200px] bg-cardBg rounded-lg overflow-hidden cursor-pointer group flex-shrink-0 border border-zinc-800">
+                    <div class="aspect-video w-full bg-zinc-800 relative">
+                        <img src="${item.poster}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <i class="fa-solid fa-play text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <h5 class="text-xs font-bold truncate">${item.title}</h5>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleRequestSubmit(e) {
+            e.preventDefault();
+            const user = document.getElementById('req-user').value.trim() || (currentUser ? currentUser.name : 'Usuário Anônimo');
+            const title = document.getElementById('req-title').value;
+            const type = document.getElementById('req-type').value;
+            const obs = document.getElementById('req-obs').value;
+
+            let requests = JSON.parse(localStorage.getItem('st_requests')) || [];
+            requests.unshift({
+                id: Date.now().toString(),
+                user,
+                title,
+                type,
+                obs,
+                date: new Date().toLocaleDateString('pt-BR')
+            });
+            localStorage.setItem('st_requests', JSON.stringify(requests));
+
+            alert("Pedido enviado com sucesso para a administração!");
+            document.getElementById('req-title').value = '';
+            document.getElementById('req-obs').value = '';
+            showSection('home');
+        }
+
+        function goBack() {
+            showSection('home');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
